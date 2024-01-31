@@ -4,6 +4,6 @@
 
 int main()
 {
-    DirectoryTree tree { fs::current_path(), 1 };
+    DirectoryTree tree { fs::current_path(), 2 };
     return 0;
 }

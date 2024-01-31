@@ -15,10 +15,10 @@ class DirectoryTree
             std::shared_ptr<Node> firstChild { nullptr };
             std::shared_ptr<Node> nextSibling { nullptr };
         };
-        
+
         std::shared_ptr<Node> m_root { nullptr };
 
-        void addPathChildren(std::shared_ptr<Node> it, int deepness);
+        void addChildren(std::shared_ptr<Node> node, int deepness);
 
     public:
         explicit DirectoryTree(int deepness = 1);

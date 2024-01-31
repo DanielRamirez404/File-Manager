@@ -9,21 +9,30 @@ DirectoryTree::DirectoryTree(int deepness) : DirectoryTree(fs::current_path(), d
 DirectoryTree::DirectoryTree(const fs::path& path, int deepness) : 
     m_root { std::make_shared<Node>( path ) }
 {
-    addPathChildren(m_root, deepness);
+    addChildren(m_root, deepness);
 }
 
 #include <iostream>
 
-void DirectoryTree::addPathChildren(std::shared_ptr<Node> it, int deepness) 
+void DirectoryTree::addChildren(std::shared_ptr<Node> node, int deepness) 
 {
+
     if (deepness <= 0)
         return;
 
-    for (auto const& dir_entry : fs::directory_iterator(it->path))
-    {
-        std::cout << dir_entry.path().filename() << '\n';
-    }
+    node->firstChild = std::make_shared<Node>();
+    std::shared_ptr<Node> sibling_it { node->firstChild };
 
-    addPathChildren(it, deepness - 1);
-    
+    for (auto const& entry_it : fs::directory_iterator(node->path))
+    {
+        sibling_it->path = entry_it.path();
+
+        if (!entry_it.is_regular_file())
+        {
+            addChildren(sibling_it, deepness - 1);
+        }
+
+        sibling_it->nextSibling = std::make_shared<Node>();
+        sibling_it = sibling_it->nextSibling;
+    }
 }
