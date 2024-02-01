@@ -25,28 +25,13 @@ void DirectoryTree::addChildren(Node* node, int deepness)
 
     for (auto const& entry_it : fs::directory_iterator(node->path))
     {
-        if (!sibling_it)
-        {
-            node->firstChild = std::make_unique<Node>(entry_it.path());
-            
-            if (!entry_it.is_regular_file())
-            {
-                addChildren(node->firstChild.get(), deepness - 1);
-            }
+        std::unique_ptr<Node>& nodeToAdd { (sibling_it) ? sibling_it->nextSibling : node->firstChild };
+        nodeToAdd = std::make_unique<Node>(entry_it.path());
 
-            sibling_it = node->firstChild.get();
-        }  
-        else
-        {
-            sibling_it->nextSibling = std::make_unique<Node>(entry_it.path());
+        if (!entry_it.is_regular_file())
+            addChildren(nodeToAdd.get(), deepness - 1);
 
-                if (!entry_it.is_regular_file())
-            {
-                addChildren(sibling_it->nextSibling.get(), deepness - 1);
-            }
-
-            sibling_it = sibling_it->nextSibling.get();
-        }
+        sibling_it = nodeToAdd.get();
     }
 }
 
