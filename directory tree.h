@@ -23,11 +23,5 @@ class DirectoryTree
     public:
         explicit DirectoryTree(int deepness = 1);
         explicit DirectoryTree(const fs::path& path, int deepness = 1);
-        friend void printNode(const Node& node);
-        friend void printChildren(const Node* node, int currentDeepness);
-        friend void printDirectoryTree(const DirectoryTree& tree);
+        friend class TreeDisplayer;
 };
-
-void printNode(const DirectoryTree::Node& node);
-void printChildren(const DirectoryTree::Node* node, int currentDeepness = 1);
-void printDirectoryTree(const DirectoryTree& tree);
