@@ -18,10 +18,16 @@ class DirectoryTree
 
         std::unique_ptr<Node> m_root { nullptr };
 
+        Node* m_iterator{};
+
         void addChildren(Node* node, int deepness);
 
     public:
+        DirectoryTree(const DirectoryTree&) = delete;
+        void operator=(const DirectoryTree&) = delete;
         explicit DirectoryTree(int deepness = 1);
         explicit DirectoryTree(const fs::path& path, int deepness = 1);
+        void iterateToSibling();
+        void iterateToChild();
         friend class TreeDisplayer;
 };

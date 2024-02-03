@@ -7,7 +7,7 @@ DirectoryTree::DirectoryTree(int deepness) : DirectoryTree(fs::current_path(), d
 }
 
 DirectoryTree::DirectoryTree(const fs::path& path, int deepness) : 
-    m_root { std::make_unique<Node>( path ) }
+    m_root { std::make_unique<Node>( path ) }, m_iterator{ m_root.get() }
 {
     addChildren(m_root.get(), deepness);
 }
@@ -29,4 +29,14 @@ void DirectoryTree::addChildren(Node* node, int deepness)
 
         sibling_it = nodeToAdd.get();
     }
+}
+
+void DirectoryTree::iterateToSibling()
+{
+    m_iterator = (m_iterator->nextSibling) ? m_iterator->nextSibling.get() : m_iterator;
+}
+
+void DirectoryTree::iterateToChild()
+{
+    m_iterator = (m_iterator->firstChild) ? m_iterator->firstChild.get() : m_iterator;
 }

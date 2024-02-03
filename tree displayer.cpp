@@ -4,10 +4,16 @@
 #include <string>
 #include <cstddef>
 
-void TreeDisplayer::display(const DirectoryTree& tree) 
+void TreeDisplayer::displayFull(const DirectoryTree& tree) 
 {
     printNode(*tree.m_root);
     printChildren(tree.m_root.get());
+}
+
+void TreeDisplayer::displayCurrent(const DirectoryTree& tree) 
+{
+    printNode(*tree.m_iterator);
+    printChildren(tree.m_iterator);
 }
 
 void TreeDisplayer::printNode(const DirectoryTree::Node& node) 
