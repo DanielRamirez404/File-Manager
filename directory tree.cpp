@@ -2,6 +2,21 @@
 #include <filesystem>
 #include <memory>
 
+void DirectoryTree::History::add(Node* node)
+{
+    record.push_back(node);
+}
+
+void DirectoryTree::History::deleteLast()
+{
+    record.pop_back();
+}
+
+void DirectoryTree::History::reset()
+{
+    record.clear();
+}
+
 DirectoryTree::DirectoryTree(int deepness) : DirectoryTree(fs::current_path(), deepness) 
 {
 }
@@ -9,6 +24,7 @@ DirectoryTree::DirectoryTree(int deepness) : DirectoryTree(fs::current_path(), d
 DirectoryTree::DirectoryTree(const fs::path& path, int deepness) : 
     m_root { std::make_unique<Node>( path ) }, m_iterator{ m_root.get() }
 {
+    m_history.add(m_iterator);
     addChildren(m_root.get(), deepness);
 }
 
@@ -34,9 +50,20 @@ void DirectoryTree::addChildren(Node* node, int deepness)
 void DirectoryTree::iterateToSibling()
 {
     m_iterator = (m_iterator->nextSibling) ? m_iterator->nextSibling.get() : m_iterator;
+    m_history.add(m_iterator);
 }
 
 void DirectoryTree::iterateToChild()
 {
     m_iterator = (m_iterator->firstChild) ? m_iterator->firstChild.get() : m_iterator;
+    m_history.add(m_iterator);
+}
+
+void DirectoryTree::resetIterator()
+{
+    if (m_iterator != m_root.get())
+    {
+        m_iterator = m_root.get();
+        m_history.add(m_iterator);
+    }
 }

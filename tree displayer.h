@@ -8,4 +8,5 @@ class TreeDisplayer {
     public:
         static void displayFull(const DirectoryTree& tree);
         static void displayCurrent(const DirectoryTree& tree);
+        static void displayHistory(const DirectoryTree& tree);
 };

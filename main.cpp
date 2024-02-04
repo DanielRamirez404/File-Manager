@@ -11,5 +11,7 @@ int main()
     tree.iterateToChild();
     tree.iterateToSibling();
     TreeDisplayer::displayCurrent(tree);
+    std::cout << "\n\n";
+    TreeDisplayer::displayHistory(tree);
     return 0;
 }

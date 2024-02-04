@@ -30,3 +30,11 @@ void TreeDisplayer::printChildren(const DirectoryTree::Node* node, int currentDe
         printChildren(it, currentDeepness + 1);
     }
 }
+
+void TreeDisplayer::displayHistory(const DirectoryTree& tree)
+{
+    for(auto i : tree.m_history.record)
+    {
+        printNode(*i);
+    }
+}
