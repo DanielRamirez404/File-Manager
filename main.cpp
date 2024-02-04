@@ -6,12 +6,15 @@
 int main()
 {
     DirectoryTree tree { fs::current_path(), 2 };
-    TreeDisplayer::displayFull(tree);
-    std::cout << "\n\n";
     tree.iterateToChild();
     tree.iterateToSibling();
-    TreeDisplayer::displayCurrent(tree);
-    std::cout << "\n\n";
-    TreeDisplayer::displayHistory(tree);
+    
+    for (int i{0}; i < 3; i++)
+    {
+        TreeDisplayer::displayCurrent(tree);
+        std::cout << "\n\n";
+        tree.iterateBack();
+    }
+    
     return 0;
 }

@@ -20,6 +20,7 @@ class DirectoryTree
         struct History
         {
             std::list<Node*> record{};
+            std::list<Node*>::iterator current{};
             void add(Node* node);
             void deleteLast();
             void reset();
@@ -40,6 +41,8 @@ class DirectoryTree
 
         void iterateToSibling();
         void iterateToChild();
+        void iterateBack();
+        void iterateForward();
         void resetIterator();
 
         friend class TreeDisplayer;

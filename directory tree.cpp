@@ -5,16 +5,19 @@
 void DirectoryTree::History::add(Node* node)
 {
     record.push_back(node);
+    current = --record.end();
 }
 
 void DirectoryTree::History::deleteLast()
 {
     record.pop_back();
+    current = --record.end();
 }
 
 void DirectoryTree::History::reset()
 {
     record.clear();
+    current = --record.end();
 }
 
 DirectoryTree::DirectoryTree(int deepness) : DirectoryTree(fs::current_path(), deepness) 
@@ -57,6 +60,24 @@ void DirectoryTree::iterateToChild()
 {
     m_iterator = (m_iterator->firstChild) ? m_iterator->firstChild.get() : m_iterator;
     m_history.add(m_iterator);
+}
+
+void DirectoryTree::iterateBack()
+{
+    if (m_history.current != m_history.record.begin())
+    {
+        --m_history.current;
+        m_iterator = *m_history.current;
+    }
+}
+
+void DirectoryTree::iterateForward()
+{
+    if (m_history.current != --m_history.record.end())
+    {
+        m_history.current++;
+        m_iterator = *m_history.current;
+    }
 }
 
 void DirectoryTree::resetIterator()
