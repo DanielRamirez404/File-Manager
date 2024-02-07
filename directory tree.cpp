@@ -1,6 +1,7 @@
 #include "directory tree.h"
 #include <filesystem>
 #include <memory>
+#include <algorithm>
 
 void DirectoryTree::History::add(const Node* node)
 {
@@ -69,16 +70,8 @@ void DirectoryTree::iterateToNode(const Node* node)
     
     m_iterator = node;
 
-    if (m_history.current != --m_history.record.end())
-    {
-        m_history.record.remove_if
-        (
-            [&](const Node* i)
-            {
-                return i == *m_history.current++;
-            }
-        );
-    }
+    while (m_history.current != --m_history.record.end())
+        m_history.record.pop_back();
 
     m_history.add(m_iterator);
 }
