@@ -5,7 +5,7 @@
 
 int main()
 {
-    DirectoryTree tree { fs::current_path(), 2 };
+    DirectoryTree tree {};
     tree.iterateToChild();
     tree.iterateToSibling();
     
