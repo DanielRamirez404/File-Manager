@@ -3,22 +3,72 @@
 #include <memory>
 #include <algorithm>
 
-void DirectoryTree::History::add(const Node* node)
+DirectoryTree::Iterator::History::History(const Node* pointer) :
+    record { pointer }, current { --record.end() }
+{
+}
+
+void DirectoryTree::Iterator::History::add(const Node* node)
 {
     record.push_back(node);
     current = --record.end();
 }
 
-void DirectoryTree::History::deleteLast()
-{
-    record.pop_back();
-    current = --record.end();
-}
-
-void DirectoryTree::History::reset()
+void DirectoryTree::Iterator::History::reset()
 {
     record.clear();
     current = --record.end();
+}
+
+DirectoryTree::Iterator::Iterator(const Node* pointer) :
+    m_pointer { pointer }, m_history { pointer }
+{
+}
+
+void DirectoryTree::Iterator::toNode(const Node* node)
+{
+    if (m_pointer == node)
+        return;
+    
+    m_pointer = node;
+
+    while (m_history.current != --m_history.record.end())
+        m_history.record.pop_back();
+
+    m_history.add(m_pointer);
+}
+
+void DirectoryTree::Iterator::toSibling()
+{
+    toNode(m_pointer->nextSibling ? m_pointer->nextSibling.get() : m_pointer);
+}
+
+void DirectoryTree::Iterator::toChild()
+{
+    toNode(m_pointer->firstChild ? m_pointer->firstChild.get() : m_pointer);
+}
+
+void DirectoryTree::Iterator::toRoot()
+{
+    toNode(*m_history.record.begin());
+}
+
+void DirectoryTree::Iterator::back()
+{
+    if (m_history.current != m_history.record.begin())
+    {
+        --m_history.current;
+        m_pointer = *m_history.current;
+    }
+}
+
+void DirectoryTree::Iterator::forward()
+{
+    if (m_history.current != --m_history.record.end())
+    {
+        ++m_history.current;
+        m_pointer = *m_history.current;
+    }
 }
 
 DirectoryTree::DirectoryTree() : DirectoryTree(fs::current_path()) 
@@ -26,9 +76,8 @@ DirectoryTree::DirectoryTree() : DirectoryTree(fs::current_path())
 }
 
 DirectoryTree::DirectoryTree(const fs::path& path) : 
-    m_root { std::make_unique<Node>( path ) }, m_iterator{ m_root.get() }
+    m_root { std::make_unique<Node>( path ) }
 {
-    m_history.add(m_iterator);
     addChildren(m_root.get());
 }
 
@@ -63,59 +112,19 @@ const DirectoryTree::Node* DirectoryTree::findChildPath(const Node* node, const 
     return nullptr;
 }
 
-void DirectoryTree::iterateToNode(const Node* node)
-{
-    if (m_iterator == node)
-        return;
-    
-    m_iterator = node;
-
-    while (m_history.current != --m_history.record.end())
-        m_history.record.pop_back();
-
-    m_history.add(m_iterator);
-}
-
 const DirectoryTree::Node* DirectoryTree::findPath(const fs::path& path) const
 {
     return (m_root->path == path) ? m_root.get() : findChildPath(m_root.get(), path);
 }
 
-
-void DirectoryTree::iterateToSibling()
-{
-    iterateToNode(m_iterator->nextSibling ? m_iterator->nextSibling.get() : m_iterator);
-}
-
-void DirectoryTree::iterateToChild()
-{
-    iterateToNode(m_iterator->firstChild ? m_iterator->firstChild.get() : m_iterator);
-}
-
-void DirectoryTree::iterateBack()
-{
-    if (m_history.current != m_history.record.begin())
-    {
-        --m_history.current;
-        m_iterator = *m_history.current;
-    }
-}
-
-void DirectoryTree::iterateForward()
-{
-    if (m_history.current != --m_history.record.end())
-    {
-        ++m_history.current;
-        m_iterator = *m_history.current;
-    }
-}
-
-void DirectoryTree::resetIterator()
-{
-    iterateToNode(m_root.get());
-}
-
 void DirectoryTree::iterateToPath(const fs::path& path)
 {
-    iterateToNode(m_iterator->path == path ? m_iterator : findPath(path));
+    const Node* foundNode { findPath(path) };
+    if (foundNode)
+        m_iterator.toNode(foundNode);
+}
+
+DirectoryTree::Iterator& DirectoryTree::iterator()
+{
+    return m_iterator;
 }

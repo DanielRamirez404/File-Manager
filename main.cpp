@@ -6,14 +6,14 @@
 int main()
 {
     DirectoryTree tree {};
-    tree.iterateToChild();
-    tree.iterateToSibling();
+    tree.iterator().toChild();
+    tree.iterator().toSibling();
     
     for (int i{0}; i < 3; i++)
     {
         TreeDisplayer::displayCurrent(tree);
         std::cout << "\n\n";
-        tree.iterateBack();
+        tree.iterator().back();
     }
     
     return 0;
