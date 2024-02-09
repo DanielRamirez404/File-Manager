@@ -2,18 +2,48 @@
 #include "tree displayer.h"
 #include <filesystem>
 #include <iostream>
+#include <string_view>
+#include <map>
+#include <utility>
 #include <string>
+
+std::map<std::string_view, Terminal::Command> Terminal::commandMap 
+{ 
+   {"quit", Command::Quit},
+   {"dir", Command::Dir}
+};
 
 void Terminal::run() const
 {
     while(m_shouldRun)
     {
-        TreeDisplayer::printCurrentPath(m_tree);
-        std::cout << "> ";
-        std::string input{};
-        std::cin >> input;
+        printPath();
+        executeCommand(getInput());
+    }
+}
 
-        if (input == "quit")
+void Terminal::printPath() const
+{
+    TreeDisplayer::printCurrentPath(m_tree);
+    std::cout << "> ";
+}
+
+std::string Terminal::getInput() const
+{
+    std::string input{};
+    std::cin >> input;
+    return input;
+}
+
+void Terminal::executeCommand(std::string_view command) const
+{
+    switch (commandMap[command])
+    {
+        case Command::Quit:
             m_shouldRun = false;
+            break;
+        case Command::Dir:
+            TreeDisplayer::displayCurrent(m_tree);
+            break;
     }
 }
