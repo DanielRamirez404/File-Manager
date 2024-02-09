@@ -8,9 +8,9 @@
 #include <string>
 
 std::map<std::string_view, Terminal::Command> Terminal::commandMap 
-{ 
-   {"quit", Command::Quit},
-   {"dir", Command::Dir}
+{
+    {"quit", Command::Quit},
+    {"dir", Command::Dir},
 };
 
 void Terminal::run() const
@@ -37,6 +37,11 @@ std::string Terminal::getInput() const
 
 void Terminal::executeCommand(std::string_view command) const
 {
+    if (!commandMap.contains(command))
+    {
+        std::cout << "Invalid command. Please try again\n";
+        return;
+    }
     switch (commandMap[command])
     {
         case Command::Quit:
