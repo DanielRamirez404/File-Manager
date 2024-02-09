@@ -23,15 +23,16 @@ class DirectoryTree
 
                 struct History
                 {
-                    std::list<const Node*> record{};
-                    std::list<const Node*>::iterator current{};
-                    History(const Node* node);
-                    void add(const Node* node);
-                    void reset();
+                        std::list<const Node*> record{};
+                        std::list<const Node*>::iterator current{};
+
+                        History(const Node* node);
+                        void add(const Node* node);
+                        void reset();
                 };
 
-                const Node* m_pointer{};
-                History m_history{ m_pointer };
+                mutable const Node* m_pointer{};
+                mutable History m_history{ m_pointer };
 
             public:
 
@@ -39,12 +40,12 @@ class DirectoryTree
                 Iterator(const Iterator&) = delete;
                 void operator=(const Iterator&) = delete;
 
-                void toNode(const Node* node);
-                void toSibling();
-                void toChild();
-                void toRoot();
-                void back();
-                void forward();
+                void toNode(const Node* node) const;
+                void toSibling() const;
+                void toChild() const;
+                void toRoot() const;
+                void back() const;
+                void forward() const;
 
                 friend class TreeDisplayer;
         };
@@ -63,8 +64,8 @@ class DirectoryTree
         explicit DirectoryTree(const fs::path& path);
 
         const Node* findPath(const fs::path& path) const;
-        void iterateToPath(const fs::path& path);
-        Iterator& iterator();
+        void iterateToPath(const fs::path& path) const;
+        const Iterator& iterator() const;
 
         friend class TreeDisplayer;
 };
