@@ -31,6 +31,12 @@ void TreeDisplayer::printChildren(const DirectoryTree::Node* node, int currentDe
     }
 }
 
+void TreeDisplayer::printCurrentPath(const DirectoryTree& tree)
+{
+    std::cout << (*(tree.iterator().get())).path.string();
+}
+
+
 void TreeDisplayer::displayHistory(const DirectoryTree& tree)
 {
     for(auto i : tree.m_iterator.m_history.record)

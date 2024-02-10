@@ -14,15 +14,20 @@ void DirectoryTree::Iterator::History::add(const Node* node)
     current = --record.end();
 }
 
-void DirectoryTree::Iterator::History::reset()
+void DirectoryTree::Iterator::History::reset(const Node* currentNode)
 {
     record.clear();
-    current = --record.end();
+    add(currentNode);
 }
 
 DirectoryTree::Iterator::Iterator(const Node* pointer) :
     m_pointer { pointer }, m_history { pointer }
 {
+}
+
+const DirectoryTree::Node* DirectoryTree::Iterator::get() const
+{
+    return m_pointer;
 }
 
 void DirectoryTree::Iterator::toNode(const Node* node) const

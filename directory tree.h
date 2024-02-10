@@ -28,7 +28,7 @@ class DirectoryTree
 
                         History(const Node* node);
                         void add(const Node* node);
-                        void reset();
+                        void reset(const Node* currentNode);
                 };
 
                 mutable const Node* m_pointer{};
@@ -40,6 +40,7 @@ class DirectoryTree
                 Iterator(const Iterator&) = delete;
                 void operator=(const Iterator&) = delete;
 
+                const Node* get() const;
                 void toNode(const Node* node) const;
                 void toSibling() const;
                 void toChild() const;
