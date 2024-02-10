@@ -9,7 +9,13 @@ class Terminal
 
         enum Command {
             Quit,
-            Dir
+            Dir,
+            Cd,
+            CdToRoot,
+            CdToChild,
+            CdToSibling,
+            CdBack,
+            CdForward
         };
 
         static std::map<std::string_view, Command> commandMap;
