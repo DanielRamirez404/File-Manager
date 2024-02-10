@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string_view>
 #include <map>
-#include <utility>
+#include <algorithm>
+#include <locale>
 #include <string>
 
 std::map<std::string_view, Terminal::Command> Terminal::commandMap 
@@ -32,6 +33,13 @@ std::string Terminal::getInput() const
 {
     std::string input{};
     std::cin >> input;
+    std::transform
+    (
+        input.begin(), input.end(), input.begin(), [](char myChar)
+        {
+            return std::tolower(myChar);
+        }
+    );
     return input;
 }
 
