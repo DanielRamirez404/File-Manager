@@ -33,14 +33,16 @@ class DirectoryTree
 
                 mutable const Node* m_pointer{};
                 mutable History m_history{ m_pointer };
+                mutable DirectoryTree* m_this_tree{};
 
             public:
 
-                Iterator(const Node* pointer);
+                Iterator(const Node* pointer, DirectoryTree* currentTree);
                 Iterator(const Iterator&) = delete;
                 void operator=(const Iterator&) = delete;
 
                 const Node* get() const;
+                void iterateToPath(const fs::path& path) const;
                 void toNode(const Node* node) const;
                 void toSibling() const;
                 void toChild() const;
@@ -52,7 +54,7 @@ class DirectoryTree
         };
 
         std::unique_ptr<Node> m_root{};
-        Iterator m_iterator{ m_root.get() };
+        Iterator m_iterator{ m_root.get(), this };
 
         void addChildren(Node* node);
         const Node* findChildPath(const Node* node, const fs::path& path) const;
@@ -65,7 +67,6 @@ class DirectoryTree
         explicit DirectoryTree(const fs::path& path);
 
         const Node* findPath(const fs::path& path) const;
-        void iterateToPath(const fs::path& path) const;
         const Iterator& iterator() const;
 
         friend class TreeDisplayer;

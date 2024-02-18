@@ -20,14 +20,26 @@ void DirectoryTree::Iterator::History::reset(const Node* currentNode)
     add(currentNode);
 }
 
-DirectoryTree::Iterator::Iterator(const Node* pointer) :
-    m_pointer { pointer }, m_history { pointer }
+DirectoryTree::Iterator::Iterator(const Node* pointer, DirectoryTree* currentTree) :
+    m_pointer { pointer }, m_history { pointer }, m_this_tree { currentTree }
 {
 }
 
 const DirectoryTree::Node* DirectoryTree::Iterator::get() const
 {
     return m_pointer;
+}
+
+void DirectoryTree::Iterator::iterateToPath(const fs::path& path) const
+{
+    const Node* pathNode { m_this_tree->findPath(path) };
+    if (!pathNode)
+    {
+        m_this_tree->m_root = std::make_unique<Node>(path);
+        m_this_tree->addChildren(m_this_tree->m_root.get());
+        pathNode = m_this_tree->m_root.get();
+    }
+    toNode(pathNode);
 }
 
 void DirectoryTree::Iterator::toNode(const Node* node) const
@@ -120,13 +132,6 @@ const DirectoryTree::Node* DirectoryTree::findChildPath(const Node* node, const 
 const DirectoryTree::Node* DirectoryTree::findPath(const fs::path& path) const
 {
     return (m_root->path == path) ? m_root.get() : findChildPath(m_root.get(), path);
-}
-
-void DirectoryTree::iterateToPath(const fs::path& path) const
-{
-    const Node* foundNode { findPath(path) };
-    if (foundNode)
-        m_iterator.toNode(foundNode);
 }
 
 const DirectoryTree::Iterator& DirectoryTree::iterator() const
