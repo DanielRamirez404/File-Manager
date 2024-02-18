@@ -2,6 +2,7 @@
 #include "tree displayer.h"
 #include <filesystem>
 #include <iostream>
+#include <vector>
 #include <string_view>
 #include <map>
 #include <algorithm>
@@ -51,6 +52,7 @@ std::string Terminal::getInput() const
 
 void Terminal::executeCommand(std::string_view command) const
 {
+    [[maybe_unused]] auto commands { parseCommand(command) };
     if (!commandMap.contains(command))
     {
         std::cout << "Invalid command. Please try again\n\n";
@@ -85,4 +87,28 @@ void Terminal::executeCommand(std::string_view command) const
             break;
     }
     std::cout << '\n';
+}
+
+std::vector<std::string_view> Terminal::parseCommand(std::string_view command) const
+{
+    auto wordCounter { static_cast<size_t>( countWords(command) ) };
+    std::vector<std::string_view> words{ wordCounter };
+    return words;
+}
+
+int Terminal::countWords(std::string_view command) const
+{
+    bool isPath { false };
+    return std::count_if
+    (
+        command.begin(), command.end(), [&isPath](char myChar)
+        {
+            if (myChar == '\"') 
+            {
+                isPath = !isPath;
+                return false;
+            }
+            return (!isPath) && (myChar == ' ');
+        }
+    );
 }
