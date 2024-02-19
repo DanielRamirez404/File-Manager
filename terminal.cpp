@@ -52,7 +52,8 @@ std::string Terminal::getInput() const
 
 void Terminal::executeCommand(std::string_view command) const
 {
-    [[maybe_unused]] auto commands { parseCommand(command) };
+
+    const auto commands { parseCommand(command) };
     if (!commandMap.contains(command))
     {
         std::cout << "Invalid command. Please try again\n\n";
@@ -91,8 +92,41 @@ void Terminal::executeCommand(std::string_view command) const
 
 std::vector<std::string_view> Terminal::parseCommand(std::string_view command) const
 {
-    auto wordCounter { static_cast<size_t>( countWords(command) ) };
+    const auto wordCounter { static_cast<size_t>( countWords(command) ) };
     std::vector<std::string_view> words{ wordCounter };
+
+    while (!command.empty())
+    {
+
+        if (command[0] == ' ')
+        {
+            command.remove_prefix(1);
+            continue;
+        }
+
+        struct WordParser
+        {
+            bool isPath{ false };
+            size_t index{0};
+            std::string_view word{};
+        } parser;
+
+        while (command[parser.index] != ' ' || parser.isPath)
+        {
+            if (command[parser.index] == '\"')
+            {
+                parser.isPath = !parser.isPath;
+            }
+            ++parser.index;
+        }
+
+        parser.word = command.substr(0, parser.index);
+
+        words.push_back(parser.word);
+
+        command.remove_prefix(parser.word.size());
+    }
+
     return words;
 }
 
