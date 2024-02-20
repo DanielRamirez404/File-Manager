@@ -8,7 +8,8 @@ class Terminal
 {
     private:
 
-        enum Command {
+        enum Command 
+        {
             Quit,
             Dir,
             Cd,
@@ -29,6 +30,7 @@ class Terminal
         void executeCommand(std::string_view command) const;
         std::vector<std::string_view> parseCommand(std::string_view command) const;
         int countWords(std::string_view command) const;
+        std::string_view getFirstWord(std::string_view command) const;
         
     public:
 

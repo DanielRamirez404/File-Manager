@@ -52,8 +52,11 @@ std::string Terminal::getInput() const
 
 void Terminal::executeCommand(std::string_view command) const
 {
-
     const auto commands { parseCommand(command) };
+
+    for (auto& s : commands)
+        std::cout << s << "\n\n";
+
     if (!commandMap.contains(command))
     {
         std::cout << "Invalid command. Please try again\n\n";
@@ -97,34 +100,13 @@ std::vector<std::string_view> Terminal::parseCommand(std::string_view command) c
 
     while (!command.empty())
     {
-
-        if (command[0] == ' ')
-        {
+        while (command[0] == ' ')
             command.remove_prefix(1);
-            continue;
-        }
 
-        struct WordParser
-        {
-            bool isPath{ false };
-            size_t index{0};
-            std::string_view word{};
-        } parser;
-
-        while (command[parser.index] != ' ' || parser.isPath)
-        {
-            if (command[parser.index] == '\"')
-            {
-                parser.isPath = !parser.isPath;
-            }
-            ++parser.index;
-        }
-
-        parser.word = command.substr(0, parser.index);
-
-        words.push_back(parser.word);
-
-        command.remove_prefix(parser.word.size());
+        std::string_view foundWord{ getFirstWord(command) };
+        words.push_back(foundWord);
+        
+        command.remove_prefix(foundWord.size());
     }
 
     return words;
@@ -145,4 +127,20 @@ int Terminal::countWords(std::string_view command) const
             return (!isPath) && (myChar == ' ');
         }
     );
+}
+
+std::string_view Terminal::getFirstWord(std::string_view command) const
+{
+    bool isPath{ false };
+
+    for (size_t i{0}; i + 1 < command.size(); ++i)
+    {
+        if (command[i] == '\"')
+            isPath = !isPath;
+
+        if (command[i + 1] == ' ' && !isPath)
+            return command.substr(0, i + 1);  
+    }
+
+    return command;
 }
