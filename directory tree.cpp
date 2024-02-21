@@ -30,7 +30,7 @@ const DirectoryTree::Node* DirectoryTree::Iterator::get() const
     return m_pointer;
 }
 
-void DirectoryTree::Iterator::iterateToPath(const fs::path& path) const
+void DirectoryTree::Iterator::toPath(const fs::path& path) const
 {
     const Node* pathNode { m_this_tree->findPath(path) };
     if (!pathNode)

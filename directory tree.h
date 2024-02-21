@@ -42,7 +42,7 @@ class DirectoryTree
                 void operator=(const Iterator&) = delete;
 
                 const Node* get() const;
-                void iterateToPath(const fs::path& path) const;
+                void toPath(const fs::path& path) const;
                 void toNode(const Node* node) const;
                 void toSibling() const;
                 void toChild() const;

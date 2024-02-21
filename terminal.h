@@ -12,15 +12,20 @@ class Terminal
         {
             Quit,
             Dir,
-            Cd,
-            CdToRoot,
-            CdToChild,
-            CdToSibling,
-            CdBack,
-            CdForward
+            Cd
+        };
+
+        enum CdCommand
+        {
+            root,
+            child,
+            sibling,
+            back,
+            forward
         };
 
         static std::map<std::string_view, Command> commandMap;
+        static std::map<std::string_view, CdCommand> cdCommandMap;
 
         mutable bool m_shouldRun{ true };
         DirectoryTree m_tree{};
@@ -28,6 +33,7 @@ class Terminal
         void printPath() const;
         std::string getInput() const;
         void executeCommand(std::string_view command) const;
+        void executeCdCommand(const std::vector<std::string_view>& wordList) const;
         std::vector<std::string_view> parseCommand(std::string_view command) const;
         int countWords(std::string_view command) const;
         std::string_view getFirstWord(std::string_view command) const;

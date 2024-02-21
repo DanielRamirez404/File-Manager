@@ -14,11 +14,15 @@ std::map<std::string_view, Terminal::Command> Terminal::commandMap
     {"quit", Command::Quit},
     {"dir", Command::Dir},
     {"cd", Command::Cd},
-    {"cd root", Command::CdToRoot},
-    {"cd child", Command::CdToChild},
-    {"cd sibling", Command::CdToSibling},
-    {"cd -", Command::CdBack},
-    {"cd +", Command::CdForward}
+};
+
+std::map<std::string_view, Terminal::CdCommand> Terminal::cdCommandMap
+{
+    {"root", CdCommand::root},
+    {"child", CdCommand::child},
+    {"sibling", CdCommand::sibling},
+    {"-", CdCommand::back},
+    {"+", CdCommand::forward},
 };
 
 void Terminal::run() const
@@ -40,6 +44,10 @@ std::string Terminal::getInput() const
 {
     std::string input{};
     std::getline(std::cin >> std::ws, input);
+
+    while (input[0] == ' ')
+        input.erase(input.begin());
+
     std::transform
     (
         input.begin(), input.end(), input.begin(), [](char myChar)
@@ -47,22 +55,23 @@ std::string Terminal::getInput() const
             return std::tolower(myChar);
         }
     );
+
     return input;
 }
 
 void Terminal::executeCommand(std::string_view command) const
 {
-    const auto commands { parseCommand(command) };
+    const auto wordList { parseCommand(command) };
 
-    for (auto& s : commands)
-        std::cout << s << "\n\n";
+    std::string_view firstCommand { wordList[0] };
 
-    if (!commandMap.contains(command))
+    if (!commandMap.contains(firstCommand))
     {
         std::cout << "Invalid command. Please try again\n\n";
         return;
     }
-    switch (commandMap[command])
+
+    switch (commandMap[firstCommand])
     {
         case Command::Quit:
             m_shouldRun = false;
@@ -71,32 +80,62 @@ void Terminal::executeCommand(std::string_view command) const
             TreeDisplayer::displayCurrent(m_tree);
             break;
         case Command::Cd:
-            TreeDisplayer::printCurrentPath(m_tree);
-            std::cout << '\n';
+            executeCdCommand(wordList);     
             break;
-        case Command::CdToRoot:
+    }
+
+    std::cout << '\n';
+}
+
+void Terminal::executeCdCommand(const std::vector<std::string_view>& wordList) const
+{
+    if (wordList.size() < 2)
+    {
+        TreeDisplayer::printCurrentPath(m_tree);
+        std::cout << '\n';
+        return;
+    }
+
+    const std::string_view cdCommand { wordList[1] };
+
+    if (!cdCommandMap.contains(cdCommand))
+    {
+        const fs::path path{ cdCommand };
+
+        if (fs::exists(path))
+            m_tree.iterator().toPath(path);
+        else
+            std::cout << "Invalid command. Please try again\n";
+
+        return;
+    }
+
+    switch (cdCommandMap[cdCommand])
+    {
+        case CdCommand::root:
             m_tree.iterator().toRoot();
             break;
-        case Command::CdToChild:
+        case CdCommand::child:
             m_tree.iterator().toChild();
             break;
-        case Command::CdToSibling:
+        case CdCommand::sibling:
             m_tree.iterator().toSibling();
             break;
-        case Command::CdBack:
+        case CdCommand::back:
             m_tree.iterator().back();
             break;
-        case Command::CdForward:
+        case CdCommand::forward:
             m_tree.iterator().forward();
             break;
     }
-    std::cout << '\n';
 }
 
 std::vector<std::string_view> Terminal::parseCommand(std::string_view command) const
 {
     const auto wordCounter { static_cast<size_t>( countWords(command) ) };
-    std::vector<std::string_view> words{ wordCounter };
+
+    std::vector<std::string_view> words{};
+    words.reserve(wordCounter);
 
     while (!command.empty())
     {
@@ -115,7 +154,7 @@ std::vector<std::string_view> Terminal::parseCommand(std::string_view command) c
 int Terminal::countWords(std::string_view command) const
 {
     bool isPath { false };
-    return std::count_if
+    return 1 + std::count_if
     (
         command.begin(), command.end(), [&isPath](char myChar)
         {
