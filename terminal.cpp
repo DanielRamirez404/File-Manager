@@ -96,10 +96,17 @@ void Terminal::executeCdCommand(const std::vector<std::string_view>& wordList) c
         return;
     }
 
-    const std::string_view cdCommand { wordList[1] };
+    std::string_view cdCommand { wordList[1] };
 
     if (!cdCommandMap.contains(cdCommand))
     {
+    
+        if (cdCommand[0] == '\"')
+        {
+            cdCommand.remove_prefix(1);
+            cdCommand.remove_suffix(1);
+        }
+
         const fs::path path{ cdCommand };
 
         if (fs::exists(path))
