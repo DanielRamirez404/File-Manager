@@ -4,43 +4,34 @@
 #include <string>
 #include <cstddef>
 
-void TreeDisplayer::displayFull(const DirectoryTree& tree) 
+void TreeDisplayer::printPath(const fs::path& path)
 {
-    printNode(*tree.m_root);
-    printChildren(tree.m_root.get());
+    std::cout << path.string();
 }
 
-void TreeDisplayer::displayCurrent(const DirectoryTree& tree) 
+void TreeDisplayer::printFilename(const fs::path& path)
 {
-    printNode(*tree.m_iterator.get());
-    printChildren(tree.m_iterator.get());
+    std::cout << path.filename().string();
 }
 
-void TreeDisplayer::printNode(const DirectoryTree::Node& node) 
+void TreeDisplayer::printChildren(const DirectoryTree::Node* node)
 {
-    std::cout << node.path.filename().string() << '\n';
-}
-
-void TreeDisplayer::printChildren(const DirectoryTree::Node* node, int currentDeepness)
-{
-    for (DirectoryTree::Node* it { node->firstChild.get() }; it; it = it->nextSibling.get())
+    for (auto const& entry_it : fs::directory_iterator(node->path))
     {
-        std::cout << std::string(static_cast<size_t>(currentDeepness * 2), ' ');
-        printNode(*it);
-        printChildren(it, currentDeepness + 1);
+        std::cout << "  ";
+        printFilename(entry_it);
+        std::cout << '\n';
     }
 }
 
 void TreeDisplayer::printCurrentPath(const DirectoryTree& tree)
 {
-    std::cout << (*(tree.iterator().get())).path.string();
+    printPath(tree.iterator().get()->path);
 }
 
-
-void TreeDisplayer::displayHistory(const DirectoryTree& tree)
+void TreeDisplayer::displayCurrent(const DirectoryTree& tree) 
 {
-    for(auto i : tree.m_iterator.m_history.record)
-    {
-        printNode(*i);
-    }
+    printFilename(tree.m_iterator.get()->path);
+    std::cout << '\n';
+    printChildren(tree.m_iterator.get());
 }

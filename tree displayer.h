@@ -3,11 +3,10 @@
 
 class TreeDisplayer {
     private:
-        static void printNode(const DirectoryTree::Node& node);
-        static void printChildren(const DirectoryTree::Node* node, int currentDeepness = 1);
+        static void printPath(const fs::path& path);
+        static void printFilename(const fs::path& path);
+        static void printChildren(const DirectoryTree::Node* node);
     public:
         static void printCurrentPath(const DirectoryTree& tree);
-        static void displayFull(const DirectoryTree& tree);
         static void displayCurrent(const DirectoryTree& tree);
-        static void displayHistory(const DirectoryTree& tree);
 };
