@@ -19,6 +19,7 @@ std::map<std::string_view, Terminal::Command> Terminal::commandMap
 std::map<std::string_view, Terminal::CdCommand> Terminal::cdCommandMap
 {
     {"root", CdCommand::root},
+    {"parent", CdCommand::parent},
     {"child", CdCommand::child},
     {"sibling", CdCommand::sibling},
     {"-", CdCommand::back},
@@ -121,6 +122,9 @@ void Terminal::executeCdCommand(const std::vector<std::string_view>& wordList) c
     {
         case CdCommand::root:
             m_tree.iterator().toRoot();
+            break;
+        case CdCommand::parent:
+            m_tree.iterator().toParent();
             break;
         case CdCommand::child:
             m_tree.iterator().toChild();

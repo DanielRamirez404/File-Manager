@@ -18,6 +18,7 @@ class Terminal
         enum CdCommand
         {
             root,
+            parent,
             child,
             sibling,
             back,

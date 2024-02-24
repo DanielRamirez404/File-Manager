@@ -46,6 +46,7 @@ class DirectoryTree
                 void toNode(const Node* node) const;
                 void toSibling() const;
                 void toChild() const;
+                void toParent() const;
                 void toRoot() const;
                 void back() const;
                 void forward() const;
@@ -56,8 +57,10 @@ class DirectoryTree
         std::unique_ptr<Node> m_root{};
         Iterator m_iterator{ m_root.get(), this };
 
-        void addChildren(Node* node);
-        const Node* findChildPath(const Node* node, const fs::path& path) const;
+        void addChildren(Node* parent, std::unique_ptr<Node>* existingChild = nullptr);
+        void addRootParent();
+        const Node* findChild(const Node* node, const fs::path& path) const;
+        const Node* findParent(const Node* node) const;
 
     public:
 
