@@ -24,15 +24,19 @@ class DirectoryTree
                 struct History
                 {
                         std::list<const Node*> record{};
-                        std::list<const Node*>::iterator current{};
+                        std::list<const Node*>::iterator currentNode{};
 
+                        History() = default;
                         History(const Node* node);
+                        const Node* current();
+                        void setCurrentToLast();
                         void add(const Node* node);
-                        void reset(const Node* currentNode);
+                        void reset();
+                        void deleteUntilCurrent();
+                        void deleteAfterCurrent();
                 };
 
-                mutable const Node* m_pointer{};
-                mutable History m_history{ m_pointer };
+                mutable History m_history{};
                 mutable DirectoryTree* m_this_tree{};
 
             public:

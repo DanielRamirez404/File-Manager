@@ -12,8 +12,8 @@ void TreeDisplayer::displayFull(const DirectoryTree& tree)
 
 void TreeDisplayer::displayCurrent(const DirectoryTree& tree) 
 {
-    printNode(*tree.m_iterator.m_pointer);
-    printChildren(tree.m_iterator.m_pointer);
+    printNode(*tree.m_iterator.get());
+    printChildren(tree.m_iterator.get());
 }
 
 void TreeDisplayer::printNode(const DirectoryTree::Node& node) 
