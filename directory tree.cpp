@@ -3,6 +3,8 @@
 #include <memory>
 #include <algorithm>
 
+#include <iostream>
+
 DirectoryTree::Iterator::History::History(const Node* pointer) :
     record { pointer }, currentNode { --record.end() }
 {
@@ -68,7 +70,7 @@ void DirectoryTree::Iterator::toPath(const fs::path& path) const
 
 void DirectoryTree::Iterator::toNode(const Node* node) const
 {
-    if (m_history.current() == node)
+    if (!node || m_history.current() == node)
         return;
     
     m_history.deleteAfterCurrent();
@@ -81,12 +83,12 @@ void DirectoryTree::Iterator::toNode(const Node* node) const
 
 void DirectoryTree::Iterator::toSibling() const
 {
-    toNode(m_history.current()->nextSibling ? m_history.current()->nextSibling.get() : m_history.current());
+    toNode(m_history.current()->nextSibling.get());
 }
 
 void DirectoryTree::Iterator::toChild() const
 {
-    toNode(m_history.current()->firstChild ? m_history.current()->firstChild.get() : m_history.current());
+    toNode(m_history.current()->firstChild.get());
 }
 
 void DirectoryTree::Iterator::toParent() const
@@ -141,6 +143,9 @@ void DirectoryTree::addChildren(Node* parent, std::unique_ptr<Node>* existingChi
 
     for (auto const& entry_it : fs::directory_iterator(parent->path))
     {
+        if (!fs::is_directory(entry_it.path()))
+            continue;
+
         std::unique_ptr<Node>& nodeToAdd { (sibling_it) ? sibling_it->nextSibling : parent->firstChild };
 
         nodeToAdd = std::make_unique<Node>(entry_it.path());
