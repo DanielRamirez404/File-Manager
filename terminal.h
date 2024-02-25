@@ -31,6 +31,8 @@ class Terminal
         mutable bool m_shouldRun{ true };
         DirectoryTree m_tree{};
 
+        static void printErrorMessage();
+
         void printPath() const;
         std::string getInput() const;
         void executeCommand(std::string_view command) const;

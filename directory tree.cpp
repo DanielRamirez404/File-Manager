@@ -3,11 +3,10 @@
 #include <memory>
 #include <algorithm>
 
-#include <iostream>
-
 DirectoryTree::Iterator::History::History(const Node* pointer) :
     record { pointer }, currentNode { --record.end() }
 {
+    fs::current_path((*currentNode)->path);
 }
 
 const DirectoryTree::Node* DirectoryTree::Iterator::History::current()
@@ -18,6 +17,8 @@ const DirectoryTree::Node* DirectoryTree::Iterator::History::current()
 void DirectoryTree::Iterator::History::setCurrentToLast() 
 {
     currentNode = --record.end();
+    if (*currentNode)
+        fs::current_path((*currentNode)->path);
 }
 
 void DirectoryTree::Iterator::History::add(const Node* node)
@@ -58,14 +59,23 @@ const DirectoryTree::Node* DirectoryTree::Iterator::get() const
 
 void DirectoryTree::Iterator::toPath(const fs::path& path) const
 {
-    const Node* pathNode { m_this_tree->findPath(path) };
-    if (!pathNode)
+    if (path.is_relative())
     {
-        m_this_tree->m_root = std::make_unique<Node>(path);
-        m_this_tree->addChildren(m_this_tree->m_root.get());
-        pathNode = m_this_tree->m_root.get();
+        toPath(fs::absolute(path));
+        return;
     }
-    toNode(pathNode);
+
+    const Node* foundNode { m_this_tree->findPath(path) };
+
+    if (foundNode)
+    {
+        toNode(foundNode);
+        return;
+    }
+
+    m_this_tree->m_root = std::make_unique<Node>(path);
+    m_this_tree->addChildren(m_this_tree->m_root.get());
+    toNode(m_this_tree->m_root.get());
 }
 
 void DirectoryTree::Iterator::toNode(const Node* node) const
@@ -98,10 +108,10 @@ void DirectoryTree::Iterator::toParent() const
 
     if (m_history.current() == m_this_tree->m_root.get())
     {
-        const fs::path currentPath { m_history.current()->path };
+        const fs::path current { m_history.current()->path };
         m_history.deleteUntilCurrent();
         m_this_tree->addRootParent();
-        toPath(currentPath);
+        toPath(current);
         toNode(m_this_tree->m_root.get());
     }
     else
@@ -118,13 +128,20 @@ void DirectoryTree::Iterator::toRoot() const
 void DirectoryTree::Iterator::back() const
 {
     if (m_history.currentNode != m_history.record.begin())
+    {
         --m_history.currentNode;
+        fs::current_path((*m_history.currentNode)->path);
+    }
+        
 }
 
 void DirectoryTree::Iterator::forward() const
 {
     if (m_history.currentNode != --m_history.record.end())
+    {
         ++m_history.currentNode;
+        fs::current_path((*m_history.currentNode)->path);
+    }
 }
 
 DirectoryTree::DirectoryTree() : DirectoryTree(fs::current_path()) 

@@ -35,6 +35,11 @@ void Terminal::run() const
     }
 }
 
+void Terminal::printErrorMessage()
+{
+    std::cout << "There\'s been an error. Please try again\n\n";
+}
+
 void Terminal::printPath() const
 {
     TreeDisplayer::printCurrentPath(m_tree);
@@ -66,9 +71,9 @@ void Terminal::executeCommand(std::string_view command) const
 
     std::string_view firstCommand { wordList[0] };
 
-    if (!commandMap.contains(firstCommand))
+    if (!commandMap.contains(firstCommand) || wordList.size() > 2)
     {
-        std::cout << "Invalid command. Please try again\n\n";
+        printErrorMessage();
         return;
     }
 
@@ -110,10 +115,10 @@ void Terminal::executeCdCommand(const std::vector<std::string_view>& wordList) c
 
         const fs::path path{ cdCommand };
 
-        if (fs::exists(path))
+        if (fs::exists(path) && fs::is_directory(path))
             m_tree.iterator().toPath(path);
         else
-            std::cout << "Invalid command. Please try again\n";
+            printErrorMessage();
 
         return;
     }
