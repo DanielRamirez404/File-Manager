@@ -17,7 +17,7 @@ const DirectoryTree::Node* DirectoryTree::Iterator::History::current()
 void DirectoryTree::Iterator::History::setCurrentToLast() 
 {
     currentNode = --record.end();
-    if (*currentNode)
+    if (current())
         fs::current_path((*currentNode)->path);
 }
 
@@ -65,17 +65,48 @@ void DirectoryTree::Iterator::toPath(const fs::path& path) const
         return;
     }
 
+    if (m_history.current() && path == m_history.current()->path)
+        return;
+
     const Node* foundNode { m_this_tree->findPath(path) };
 
-    if (foundNode)
-    {
-        toNode(foundNode);
-        return;
-    }
+    (foundNode) ? toNode(foundNode) : toNonExistentNode(path);
+}
 
-    m_this_tree->m_root = std::make_unique<Node>(path);
-    m_this_tree->addChildren(m_this_tree->m_root.get());
-    toNode(m_this_tree->m_root.get());
+void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
+{
+    const fs::path& root { m_this_tree->m_root.get()->path };
+    const std::string rootString { root.string() };
+    const std::string pathString { path.string() };
+
+    constexpr auto stringContains
+    {    
+        [](std::string_view container, std::string_view contained)
+        {
+            return container.find(contained) != std::string_view::npos;
+        }
+    };
+
+    if (stringContains(rootString, pathString))
+    {
+        while (m_this_tree->m_root.get()->path != path)
+            m_this_tree->addRootParent();
+            
+        toNode(m_this_tree->m_root.get());
+    }
+    else if (stringContains(pathString, rootString))
+    {
+        //todo
+        m_this_tree->m_root = std::make_unique<Node>(path);
+        m_this_tree->addChildren(m_this_tree->m_root.get());
+        toNode(m_this_tree->m_root.get());
+    }
+    else
+    {
+        m_this_tree->m_root = std::make_unique<Node>(path);
+        m_this_tree->addChildren(m_this_tree->m_root.get());
+        toNode(m_this_tree->m_root.get());
+    }
 }
 
 void DirectoryTree::Iterator::toNode(const Node* node) const
