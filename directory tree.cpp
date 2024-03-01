@@ -70,14 +70,39 @@ void DirectoryTree::Iterator::toPath(const fs::path& path) const
 
     const Node* foundNode { m_this_tree->findPath(path) };
 
-    (foundNode) ? toNode(foundNode) : toNonExistentNode(path);
+    (foundNode) ? toNode(foundNode) : toNonExistentNode(path, m_this_tree->m_root.get());
 }
 
-void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
+void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path, const Node* iterator) const
 {
-    const fs::path& root { m_this_tree->m_root.get()->path };
-    const std::string rootString { root.string() };
-    const std::string pathString { path.string() };
+
+    std::string rootString { m_this_tree->m_root.get()->path.string() };
+    std::string iteratorString { iterator->path.string() };
+    std::string pathString { path.string() };
+
+    std::transform
+    (
+        rootString.begin(), rootString.end(), rootString.begin(), [](char myChar) 
+        { 
+            return tolower(myChar); 
+        }
+    );
+
+    std::transform
+    (
+        iteratorString.begin(), iteratorString.end(), iteratorString.begin(), [](char myChar) 
+        { 
+            return tolower(myChar); 
+        }
+    );
+
+    std::transform
+    (
+        pathString.begin(), pathString.end(), pathString.begin(), [](char myChar) 
+        { 
+            return tolower(myChar); 
+        }
+    );
 
     constexpr auto stringContains
     {    
@@ -94,12 +119,35 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
             
         toNode(m_this_tree->m_root.get());
     }
-    else if (stringContains(pathString, rootString))
+    else if (stringContains(pathString, iteratorString))
     {
-        //todo
-        m_this_tree->m_root = std::make_unique<Node>(path);
-        m_this_tree->addChildren(m_this_tree->m_root.get());
-        toNode(m_this_tree->m_root.get());
+        for (const auto* sibling_it {iterator->firstChild.get()}; sibling_it; sibling_it = sibling_it->nextSibling.get())
+        {
+            std::string siblingString { sibling_it->path.string() };
+            std::transform
+            (
+                siblingString.begin(), siblingString.end(), siblingString.begin(), [](char myChar) 
+                { 
+                    return tolower(myChar); 
+                }
+            );
+
+            if (siblingString == pathString)
+            {
+                toNode(sibling_it);
+                return;
+            }
+
+            if (stringContains(pathString, siblingString))
+            {
+                if (!sibling_it->firstChild.get())
+                {
+                    m_this_tree->addChildren(const_cast<Node*>(sibling_it));
+                }
+                toNonExistentNode(pathString, sibling_it);
+                return;
+            }
+        }
     }
     else
     {

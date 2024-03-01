@@ -39,7 +39,7 @@ class DirectoryTree
                 mutable History m_history{};
                 mutable DirectoryTree* m_this_tree{};
 
-                void toNonExistentNode(const fs::path& path) const;
+                void toNonExistentNode(const fs::path& path, const Node* iterator) const;
 
             public:
 
