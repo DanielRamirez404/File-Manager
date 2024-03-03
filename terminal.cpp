@@ -1,8 +1,10 @@
 #include "terminal.h"
 #include "tree displayer.h"
+#include "strings.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
+#include <utility>
 #include <string_view>
 #include <map>
 #include <algorithm>
@@ -53,16 +55,8 @@ std::string Terminal::getInput() const
 
     while (input[0] == ' ')
         input.erase(input.begin());
-
-    std::transform
-    (
-        input.begin(), input.end(), input.begin(), [](char myChar)
-        {
-            return std::tolower(myChar);
-        }
-    );
-
-    return input;
+        
+    return String::getLowercase(std::move(input));
 }
 
 void Terminal::executeCommand(std::string_view command) const

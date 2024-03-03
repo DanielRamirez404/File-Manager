@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <string_view>
 #include <list>
 #include <filesystem>
 
@@ -39,7 +40,8 @@ class DirectoryTree
                 mutable History m_history{};
                 mutable DirectoryTree* m_this_tree{};
 
-                void toNonExistentNode(const fs::path& path, const Node* iterator) const;
+                void toNonExistentNode(const fs::path& path) const;
+                void toNonExistentDerivedNode(std::string_view pathString, const Node* parent) const;
 
             public:
 

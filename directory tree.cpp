@@ -71,13 +71,12 @@ void DirectoryTree::Iterator::toPath(const fs::path& path) const
 
     const Node* foundNode { m_this_tree->findPath(path) };
 
-    (foundNode) ? toNode(foundNode) : toNonExistentNode(path, m_this_tree->m_root.get());
+    (foundNode) ? toNode(foundNode) : toNonExistentNode(path);
 }
 
-void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path, const Node* iterator) const
+void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
 {
     std::string rootString { String::getLowercase(m_this_tree->m_root.get()->path.string()) };
-    std::string iteratorString { String::getLowercase(iterator->path.string()) };
     std::string pathString { String::getLowercase(path.string()) };
 
     if (String::contains(rootString, pathString))
@@ -87,34 +86,38 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path, const Node
             
         toNode(m_this_tree->m_root.get());
     }
-    else if (String::contains(pathString, iteratorString))
+    else if (String::contains(pathString, rootString))
     {
-        for (const auto* sibling_it {iterator->firstChild.get()}; sibling_it; sibling_it = sibling_it->nextSibling.get())
-        {
-            std::string siblingString { String::getLowercase(sibling_it->path.string()) };
-
-            if (siblingString == pathString)
-            {
-                toNode(sibling_it);
-                return;
-            }
-
-            if (String::contains(pathString, siblingString))
-            {
-                if (!sibling_it->firstChild.get())
-                {
-                    m_this_tree->addChildren(const_cast<Node*>(sibling_it));
-                }
-                toNonExistentNode(pathString, sibling_it);
-                return;
-            }
-        }
+        toNonExistentDerivedNode(pathString, m_this_tree->m_root.get());
     }
     else
     {
         m_this_tree->m_root = std::make_unique<Node>(path);
         m_this_tree->addChildren(m_this_tree->m_root.get());
         toNode(m_this_tree->m_root.get());
+    }
+}
+
+void DirectoryTree::Iterator::toNonExistentDerivedNode(std::string_view pathString, const Node* parent) const
+{
+    for (const auto* sibling_it {parent->firstChild.get()}; sibling_it; sibling_it = sibling_it->nextSibling.get())
+    {
+        std::string siblingString { String::getLowercase(sibling_it->path.string()) };
+
+        if (siblingString == pathString)
+        {
+            toNode(sibling_it);
+            return;
+        }
+
+        if (String::contains(pathString, siblingString))
+        {
+            if (!sibling_it->firstChild.get())
+                m_this_tree->addChildren(const_cast<Node*>(sibling_it));
+
+            toNonExistentDerivedNode(pathString, sibling_it);
+            return;
+        }
     }
 }
 
