@@ -1,4 +1,5 @@
 #include "directory tree.h"
+#include "strings.h"
 #include <filesystem>
 #include <memory>
 #include <algorithm>
@@ -75,62 +76,22 @@ void DirectoryTree::Iterator::toPath(const fs::path& path) const
 
 void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path, const Node* iterator) const
 {
+    std::string rootString { String::getLowercase(m_this_tree->m_root.get()->path.string()) };
+    std::string iteratorString { String::getLowercase(iterator->path.string()) };
+    std::string pathString { String::getLowercase(path.string()) };
 
-    std::string rootString { m_this_tree->m_root.get()->path.string() };
-    std::string iteratorString { iterator->path.string() };
-    std::string pathString { path.string() };
-
-    std::transform
-    (
-        rootString.begin(), rootString.end(), rootString.begin(), [](char myChar) 
-        { 
-            return tolower(myChar); 
-        }
-    );
-
-    std::transform
-    (
-        iteratorString.begin(), iteratorString.end(), iteratorString.begin(), [](char myChar) 
-        { 
-            return tolower(myChar); 
-        }
-    );
-
-    std::transform
-    (
-        pathString.begin(), pathString.end(), pathString.begin(), [](char myChar) 
-        { 
-            return tolower(myChar); 
-        }
-    );
-
-    constexpr auto stringContains
-    {    
-        [](std::string_view container, std::string_view contained)
-        {
-            return container.find(contained) != std::string_view::npos;
-        }
-    };
-
-    if (stringContains(rootString, pathString))
+    if (String::contains(rootString, pathString))
     {
         while (m_this_tree->m_root.get()->path != path)
             m_this_tree->addRootParent();
             
         toNode(m_this_tree->m_root.get());
     }
-    else if (stringContains(pathString, iteratorString))
+    else if (String::contains(pathString, iteratorString))
     {
         for (const auto* sibling_it {iterator->firstChild.get()}; sibling_it; sibling_it = sibling_it->nextSibling.get())
         {
-            std::string siblingString { sibling_it->path.string() };
-            std::transform
-            (
-                siblingString.begin(), siblingString.end(), siblingString.begin(), [](char myChar) 
-                { 
-                    return tolower(myChar); 
-                }
-            );
+            std::string siblingString { String::getLowercase(sibling_it->path.string()) };
 
             if (siblingString == pathString)
             {
@@ -138,7 +99,7 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path, const Node
                 return;
             }
 
-            if (stringContains(pathString, siblingString))
+            if (String::contains(pathString, siblingString))
             {
                 if (!sibling_it->firstChild.get())
                 {
