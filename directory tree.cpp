@@ -4,6 +4,8 @@
 #include <memory>
 #include <algorithm>
 
+#include <iostream>
+
 DirectoryTree::Iterator::History::History(const Node* pointer) :
     record { pointer }, currentNode { --record.end() }
 {
@@ -81,7 +83,7 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
 
     if (String::contains(rootString, pathString))
     {
-        while (m_this_tree->m_root.get()->path != path)
+        while (String::getLowercase(m_this_tree->m_root.get()->path.string()) != pathString)
             m_this_tree->addRootParent();
             
         toNode(m_this_tree->m_root.get());
