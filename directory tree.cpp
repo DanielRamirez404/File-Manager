@@ -4,8 +4,6 @@
 #include <memory>
 #include <algorithm>
 
-#include <iostream>
-
 DirectoryTree::Iterator::History::History(const Node* pointer) :
     record { pointer }, currentNode { --record.end() }
 {
@@ -81,6 +79,17 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
     std::string rootString { String::getLowercase(m_this_tree->m_root.get()->path.string()) };
     std::string pathString { String::getLowercase(path.string()) };
 
+    std::string_view commonPath { String::getCommonSubstring(rootString, pathString) };
+
+    if (commonPath.size() == 0)
+    {
+        m_this_tree->m_root = std::make_unique<Node>(path);
+        m_this_tree->addChildren(m_this_tree->m_root.get());
+        toNode(m_this_tree->m_root.get());
+        m_history.reset();
+        return;
+    }
+
     if (String::contains(rootString, pathString))
     {
         while (String::getLowercase(m_this_tree->m_root.get()->path.string()) != pathString)
@@ -94,9 +103,10 @@ void DirectoryTree::Iterator::toNonExistentNode(const fs::path& path) const
     }
     else
     {
-        m_this_tree->m_root = std::make_unique<Node>(path);
-        m_this_tree->addChildren(m_this_tree->m_root.get());
-        toNode(m_this_tree->m_root.get());
+        commonPath.remove_suffix(1); // remove the last '\' character
+        toNonExistentNode(fs::path(commonPath));
+        toNonExistentNode(path);
+        m_history.record.erase(--(--m_history.record.end()));
     }
 }
 
